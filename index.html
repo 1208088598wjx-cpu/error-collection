@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leo's Error Collection · AI Solution</title>
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true},{left: '$', right: '$', display: false}]});">
+    </script>
+    <style>
+        /* ===== Minimalist Academic Style ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+            background: #F8FAFC;
+            color: #2D3748;
+            line-height: 1.7;
+            padding: 32px 20px 60px;
+        }
+        .container { max-width: 880px; margin: 0 auto; }
+        .header {
+            border-bottom: 2px solid #E2E8F0;
+            padding-bottom: 20px;
+            margin-bottom: 32px;
+        }
+        .header h1 { font-size: 28px; font-weight: 700; color: #1A365D; }
+        .header .sub { font-size: 15px; color: #4A5568; margin-top: 4px; }
+        .stats-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px 30px;
+            padding: 12px 0 18px;
+            border-bottom: 1px solid #EDF2F7;
+            margin-bottom: 28px;
+        }
+        .stats-bar .stat-item { font-size: 14px; color: #4A5568; }
+        .stats-bar .stat-item .num { font-weight: 700; font-size: 20px; color: #1A365D; margin-left: 4px; }
+        .stats-bar .stat-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .stats-bar .stat-actions button {
+            background: transparent;
+            border: 1px solid #CBD5E0;
+            border-radius: 4px;
+            padding: 5px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .stats-bar .stat-actions button:hover { background: #EDF2F7; }
+        .stats-bar .stat-actions button.primary { background: #1A365D; border-color: #1A365D; color: #fff; }
+        .stats-bar .stat-actions button.danger { border-color: #FEB2B2; color: #C53030; }
+        .photo-ai-area {
+            background: #F7FAFC;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            border-left: 4px solid #3182CE;
+        }
+        .photo-ai-area .area-title { font-weight: 600; font-size: 16px; color: #1A365D; margin-bottom: 12px; }
+        .photo-upload-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .photo-upload-row .btn-action {
+            padding: 6px 20px;
+            border: 1px solid #3182CE;
+            border-radius: 4px;
+            background: transparent;
+            color: #3182CE;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .photo-upload-row .btn-action:hover { background: #EBF8FF; }
+        .photo-upload-row .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+        .photo-upload-row .ai-status { font-size: 14px; color: #4A5568; min-width: 100px; }
+        .photo-ai-area .hint { font-size: 13px; color: #718096; margin-top: 10px; }
+        .result-preview {
+            margin-top: 16px;
+            padding: 16px 20px;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            min-height: 60px;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        /* AI Assistant */
+        .ai-assistant {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #E2E8F0;
+        }
+        .ai-assistant .assistant-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1A365D;
+            margin-bottom: 10px;
+        }
+        .chat-messages {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .chat-messages .msg { margin-bottom: 6px; }
+        .chat-messages .msg.user { color: #1A365D; font-weight: 500; }
+        .chat-messages .msg.ai { color: #2D3748; border-left: 3px solid #3182CE; padding-left: 10px; }
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input-row input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #FFFFFF;
+        }
+        .chat-input-row input:focus { outline: none; border-color: #3182CE; }
+        .chat-input-row button {
+            padding: 8px 20px;
+            border: 1px solid #3182CE;
+            border-radius: 4px;
+            background: transparent;
+            color: #3182CE;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .chat-input-row button:hover { background: #EBF8FF; }
+
+        /* Step cards */
+        .step-card {
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+        .step-card:last-of-type { border-bottom: none; }
+        .step-card .step-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .step-card .step-number {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1A365D;
+            min-width: 32px;
+        }
+        .step-card .step-number.done { color: #3182CE; }
+        .step-card .step-title { font-weight: 600; font-size: 17px; color: #2D3748; }
+        .step-card .step-title .ai-badge { font-weight: 400; font-size: 13px; color: #718096; margin-left: 6px; }
+        .step-card .step-hint { font-size: 13px; color: #718096; margin-left: auto; }
+        .step-card .step-body { display: flex; flex-direction: column; gap: 12px; }
+        .step-card label { font-size: 14px; font-weight: 600; color: #2D3748; display: block; margin-bottom: 2px; }
+        .step-card label .label-hint { font-weight: 400; color: #718096; font-size: 13px; }
+        .step-card input, .step-card textarea, .step-card select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #FFFFFF;
+        }
+        .step-card input:focus, .step-card textarea:focus { outline: none; border-color: #3182CE; }
+        .step-card textarea { min-height: 70px; resize: vertical; }
+        .step-card .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .step-card .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        .step-card .tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .step-card .tag-group .tag {
+            padding: 4px 14px;
+            border: 1px solid #CBD5E0;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            background: #fff;
+            color: #2D3748;
+        }
+        .step-card .tag-group .tag.active-gold {
+            background: #1A365D;
+            border-color: #1A365D;
+            color: #fff;
+        }
+        .chinese-explanation {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #F7FAFC;
+            border-left: 3px solid #3182CE;
+        }
+        .practice-item { margin-bottom: 18px; }
+        .practice-item .practice-label { font-weight: 600; font-size: 14px; color: #1A365D; margin-right: 8px; }
+        .practice-item .practice-text { font-size: 14px; color: #2D3748; display: inline-block; margin-right: 16px; }
+        .practice-item .practice-blank {
+            border-bottom: 1px dashed #CBD5E0;
+            min-height: 28px;
+            margin-top: 4px;
+        }
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 28px 0 24px;
+            padding-top: 20px;
+            border-top: 1px solid #EDF2F7;
+        }
+        .action-bar .btn {
+            padding: 8px 24px;
+            border: 1px solid #CBD5E0;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            background: transparent;
+            color: #2D3748;
+        }
+        .action-bar .btn:hover { background: #EDF2F7; }
+        .action-bar .btn.primary { background: #1A365D; border-color: #1A365D; color: #fff; }
+        .action-bar .btn.secondary { border-color: #CBD5E0; color: #4A5568; }
+        .history-section { margin-top: 40px; padding-top: 24px; border-top: 2px solid #E2E8F0; }
+        .history-section .section-title { font-size: 20px; font-weight: 700; color: #1A365D; margin-bottom: 18px; }
+        .history-section .section-title .count { font-size: 14px; font-weight: 400; color: #718096; background: #EDF2F7; padding: 0 12px; border-radius: 20px; }
+        .history-empty { text-align: center; padding: 40px 20px; color: #A0AEC0; border: 1px dashed #E2E8F0; border-radius: 4px; background: #FAFAFA; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; }
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #F0F4F8;
+            cursor: pointer;
+        }
+        .history-item:hover { background: #F7FAFC; }
+        .history-item .h-index { font-weight: 700; color: #3182CE; font-size: 14px; min-width: 30px; }
+        .history-item .h-title { font-weight: 500; font-size: 15px; color: #1A365D; flex: 1; }
+        .history-item .h-meta { font-size: 13px; color: #718096; display: flex; gap: 12px; }
+        .history-item .h-meta .tag-cat { background: #EDF2F7; padding: 1px 12px; border-radius: 12px; }
+        .history-item .h-actions { display: flex; gap: 6px; margin-left: auto; }
+        .history-item .h-actions button { background: none; border: none; font-size: 15px; cursor: pointer; padding: 2px 6px; color: #718096; }
+        .history-item .h-actions button:hover { background: #EDF2F7; color: #2D3748; }
+        .history-item .h-actions button.del:hover { background: #FFF5F5; color: #C53030; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #fff;
+            border-radius: 6px;
+            max-width: 780px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 34px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            position: relative;
+        }
+        .modal-box .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #718096;
+        }
+        .modal-box .modal-close:hover { color: #2D3748; }
+        .modal-box .modal-title { font-size: 22px; font-weight: 700; color: #1A365D; margin-bottom: 6px; }
+        .modal-box .modal-meta { font-size: 14px; color: #718096; margin-bottom: 20px; display: flex; gap: 16px; }
+        .modal-box .modal-body { display: flex; flex-direction: column; gap: 16px; }
+        .modal-box .modal-body .m-block { border-left: 3px solid #3182CE; padding-left: 16px; }
+        .modal-box .modal-body .m-block .m-label { font-weight: 600; font-size: 14px; color: #1A365D; margin-bottom: 2px; }
+        .modal-box .modal-body .m-block .m-text { font-size: 14px; line-height: 1.7; color: #2D3748; white-space: pre-wrap; }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #2D3748;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0;
+            transition: 0.35s;
+            z-index: 1200;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #1A365D; }
+        .toast.error { background: #C53030; }
+        /* Image preview in steps */
+        .image-upload-preview {
+            margin-top: 6px;
+        }
+        .image-upload-preview img {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+            display: none;
+        }
+        .image-upload-preview img.show { display: block; }
+        .file-input-label {
+            display: inline-block;
+            padding: 4px 14px;
+            border: 1px solid #CBD5E0;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            background: #fff;
+            transition: 0.2s;
+        }
+        .file-input-label:hover { background: #EDF2F7; }
+        .file-input-hidden { display: none; }
+
+        @media (max-width: 640px) {
+            body { padding: 16px 12px 40px; }
+            .stats-bar .stat-actions { margin-left: 0; width: 100%; justify-content: flex-start; }
+            .step-card .row-2, .step-card .row-3 { grid-template-columns: 1fr; }
+            .photo-upload-row { flex-direction: column; align-items: stretch; }
+            .chat-input-row { flex-wrap: wrap; }
+            .chat-input-row input { flex: 1 1 100%; }
+        }
+    /* ===== 移除所有左侧蓝色竖条 ===== */
+    .photo-ai-area,
+    .step-card#step2,
+    .step-card#step3,
+    .chinese-explanation,
+    .highlight-block,
+    .m-block,
+    .chat-messages .msg.ai {
+        border-left: none !important;
+    }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1>Leo's Error Collection · AI Solution</h1>
+        <div class="sub">Systematic error review with AI-powered analysis</div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat-item">Total: <span class="num" id="totalCount">0</span></div>
+        <div class="stat-item">This week: <span class="num" id="weekCount">0</span></div>
+        <div class="stat-actions">
+            <button class="primary" onclick="window.print()">Export PDF</button>
+            <button onclick="exportData()">Export JSON</button>
+            <button onclick="importData()">Import JSON</button>
+            <button class="danger" onclick="clearAll()">Clear all</button>
+        </div>
+    </div>
+
+    <div class="photo-ai-area">
+        <div class="area-title">AI Solution Engine</div>
+        <div class="photo-upload-row">
+            <button class="btn-action" id="aiGenBtn" onclick="aiGenerate()">Generate Solution</button>
+            <span class="ai-status" id="aiStatus">Ready</span>
+        </div>
+        <div class="hint">
+            Enter a math problem in the field below, then click <strong>Generate Solution</strong> to get step-by-step analysis.
+        </div>
+        <div class="result-preview" id="resultPreview">
+            <em>Click "Generate Solution" to get AI analysis (supports LaTeX).</em>
+        </div>
+
+        <!-- AI Assistant Chat -->
+        <div class="ai-assistant">
+            <div class="assistant-title">AI Assistant</div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="msg ai">Hello! I can explain concepts, suggest solution methods, or answer questions about math. Try asking something like "Explain the quadratic formula" or "How to solve inequalities?"</div>
+            </div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInput" placeholder="Ask a math question..." />
+                <button onclick="sendChat()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <form id="form">
+        <!-- Step 1 -->
+        <div class="step-card" id="step1">
+            <div class="step-header">
+                <span class="step-number" id="num1">1</span>
+                <span class="step-title">Problem Restatement</span>
+                <span class="step-hint">Key points</span>
+            </div>
+            <div class="step-body">
+                <div class="row-2">
+                    <div>
+                        <label>Question / conditions</label>
+                        <textarea id="s1_content" placeholder="Paste or type the problem..." rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label>Time &amp; context</label>
+                        <input id="s1_scene" placeholder="e.g. weekly test, homework" />
+                    </div>
+                </div>
+                <div>
+                    <label>Attach image (optional, preview only)</label>
+                    <div>
+                        <label class="file-input-label" for="problemImageInput">Choose image</label>
+                        <input type="file" id="problemImageInput" accept="image/*" class="file-input-hidden" />
+                    </div>
+                    <div class="image-upload-preview">
+                        <img id="problemImagePreview" alt="Problem image preview" />
+                    </div>
+                </div>
+                <div>
+                    <label>Critical failure point <span class="label-hint">(the exact mistake)</span></label>
+                    <input id="s1_key" placeholder="Where did you go wrong?" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card" id="step2" style="border-left: 3px solid #3182CE; padding-left: 16px;">
+            <div class="step-header">
+                <span class="step-number" id="num2">2</span>
+                <span class="step-title">Error Diagnosis <span style="font-weight:400;font-size:14px;color:#C53030;">(you fill)</span></span>
+                <span class="step-hint">Self-analysis</span>
+            </div>
+            <div class="step-body">
+                <div>
+                    <label>Category</label>
+                    <div class="tag-group" id="errorTags">
+                        <span class="tag" data-value="Knowledge Gap">Knowledge Gap</span>
+                        <span class="tag" data-value="Thinking Trap">Thinking Trap</span>
+                        <span class="tag" data-value="Calculation/Logic Error">Calculation/Logic Error</span>
+                    </div>
+                    <input type="hidden" id="s2_category" value="" />
+                </div>
+                <div>
+                    <label>Detailed description</label>
+                    <textarea id="s2_detail" placeholder="Analyze the root cause..." rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card" id="step3">
+            <div class="step-header">
+                <span class="step-number" id="num3">3</span>
+                <span class="step-title">Correct Solution <span class="ai-badge">(AI generated)</span></span>
+                <span class="step-hint">Step‑by‑step</span>
+            </div>
+            <div class="step-body">
+                <div>
+                    <label>Standard solution (stepwise)</label>
+                    <textarea id="s3_solution" placeholder="AI will fill..." rows="6"></textarea>
+                </div>
+                <div>
+                    <label>Attach visual diagram (optional, preview only)</label>
+                    <div>
+                        <label class="file-input-label" for="visualImageInput">Choose image</label>
+                        <input type="file" id="visualImageInput" accept="image/*" class="file-input-hidden" />
+                    </div>
+                    <div class="image-upload-preview">
+                        <img id="visualImagePreview" alt="Visual diagram preview" />
+                    </div>
+                </div>
+                <div class="chinese-explanation">
+                    <strong>Chinese explanation:</strong><br />
+                    <span id="chineseSummaryText">AI will provide a Chinese explanation here.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card" id="step4">
+            <div class="step-header">
+                <span class="step-number" id="num4">4</span>
+                <span class="step-title">Underlying Knowledge <span class="ai-badge">(AI generated)</span></span>
+                <span class="step-hint">Prerequisites</span>
+            </div>
+            <div class="step-body">
+                <div class="row-2">
+                    <div>
+                        <label>Topic name</label>
+                        <input id="s4_name" placeholder="AI will fill..." />
+                    </div>
+                    <div>
+                        <label>Core prerequisite / conditions</label>
+                        <input id="s4_condition" placeholder="e.g. a>0, discriminant ≥0" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-card" id="step5">
+            <div class="step-header">
+                <span class="step-number" id="num5">5</span>
+                <span class="step-title">Extensions &amp; Distinctions <span class="ai-badge">(AI generated)</span></span>
+                <span class="step-hint">Signal words</span>
+            </div>
+            <div class="step-body">
+                <div>
+                    <label>Confusable concepts / similar questions</label>
+                    <textarea id="s5_contrast" placeholder="AI will fill..." rows="2"></textarea>
+                </div>
+                <div>
+                    <label>Solving signal <span class="label-hint">(trigger → knowledge)</span></label>
+                    <input id="s5_signal" placeholder="e.g. 'maximum/minimum' → quadratic vertex" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step-card" id="step6">
+            <div class="step-header">
+                <span class="step-number" id="num6">6</span>
+                <span class="step-title">Practice &amp; Reinforcement <span class="ai-badge">(AI generated)</span></span>
+                <span class="step-hint">Closed loop</span>
+            </div>
+            <div class="step-body">
+                <div class="practice-item">
+                    <div>
+                        <span class="practice-label">Same type:</span>
+                        <span class="practice-text" id="s6_same_display">AI will fill...</span>
+                        <input type="hidden" id="s6_same" value="" />
+                    </div>
+                    <div class="practice-blank"></div>
+                </div>
+                <div class="practice-item">
+                    <div>
+                        <span class="practice-label">Variant:</span>
+                        <span class="practice-text" id="s6_variant_display">AI will fill...</span>
+                        <input type="hidden" id="s6_variant" value="" />
+                    </div>
+                    <div class="practice-blank"></div>
+                </div>
+                <div class="practice-item">
+                    <div>
+                        <span class="practice-label">Comprehensive:</span>
+                        <span class="practice-text" id="s6_comprehensive_display">AI will fill...</span>
+                        <input type="hidden" id="s6_comprehensive" value="" />
+                    </div>
+                    <div class="practice-blank"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button type="button" class="btn primary" onclick="saveRecord()">Save Record</button>
+            <button type="button" class="btn secondary" onclick="resetForm()">Clear Form</button>
+            <button type="button" class="btn secondary" onclick="fillSample()">Load Sample</button>
+        </div>
+    </form>
+
+    <section class="history-section" id="historySection">
+        <div class="section-title">
+            Collection History
+            <span class="count" id="historyCount">0 entries</span>
+        </div>
+        <div id="historyList">
+            <div class="history-empty">No errors recorded yet. Start your first one!</div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title" id="modalTitle">Error Detail</div>
+        <div class="modal-meta" id="modalMeta"></div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleImport(event)" />
+
+<script>
+    // ===== Data Layer =====
+    const STORAGE_KEY = 'leo_real_errors';
+    function getRecords() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+    function saveRecords(r) { localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); }
+    let records = getRecords();
+    let editingId = null;
+
+    // ===== DOM refs =====
+    const $ = id => document.getElementById(id);
+    const s1_content = $('s1_content'), s1_scene = $('s1_scene'), s1_key = $('s1_key');
+    const s2_category = $('s2_category'), s2_detail = $('s2_detail');
+    const s3_solution = $('s3_solution');
+    const s4_name = $('s4_name'), s4_condition = $('s4_condition');
+    const s5_contrast = $('s5_contrast'), s5_signal = $('s5_signal');
+    const s6_same = $('s6_same'), s6_variant = $('s6_variant'), s6_comprehensive = $('s6_comprehensive');
+    const s6_same_display = $('s6_same_display'), s6_variant_display = $('s6_variant_display'), s6_comprehensive_display = $('s6_comprehensive_display');
+    const chineseSummaryText = $('chineseSummaryText');
+    const totalCount = $('totalCount'), weekCount = $('weekCount');
+    const historyList = $('historyList'), historyCount = $('historyCount');
+    const aiStatus = $('aiStatus');
+    const resultPreview = $('resultPreview');
+    const chatMessages = $('chatMessages'), chatInput = $('chatInput');
+    const problemImageInput = $('problemImageInput'), problemImagePreview = $('problemImagePreview');
+    const visualImageInput = $('visualImageInput'), visualImagePreview = $('visualImagePreview');
+
+    // ===== Image preview handlers =====
+    problemImageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            problemImagePreview.src = ev.target.result;
+            problemImagePreview.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    visualImageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            visualImagePreview.src = ev.target.result;
+            visualImagePreview.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ===== Generate Solution =====
+    async function aiGenerate() {
+        const btn = $('aiGenBtn');
+        btn.disabled = true;
+        aiStatus.textContent = 'Contacting AI...';
+        const question = s1_content.value.trim();
+        if (!question) {
+            showToast('Please enter a problem first.', 'error');
+            btn.disabled = false;
+            aiStatus.textContent = 'Ready';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/solve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            s3_solution.value = data.solution || '';
+            // visual field is now image, no text input
+            s4_name.value = data.name || '';
+            s4_condition.value = data.condition || '';
+            s5_contrast.value = data.contrast || '';
+            s5_signal.value = data.signal || '';
+            s6_same.value = data.same || '';
+            s6_variant.value = data.variant || '';
+            s6_comprehensive.value = data.comprehensive || '';
+            s6_same_display.textContent = data.same || '—';
+            s6_variant_display.textContent = data.variant || '—';
+            s6_comprehensive_display.textContent = data.comprehensive || '—';
+            chineseSummaryText.textContent = data.chinese_summary || 'No Chinese explanation.';
+
+            const fullText = `
+**Solution**  
+${data.solution || ''}
+
+**Topic**  
+${data.name || ''}
+
+**Prerequisites**  
+${data.condition || ''}
+
+**Confusable Concepts**  
+${data.contrast || ''}
+
+**Solving Signal**  
+${data.signal || ''}
+
+**Practice Questions**  
+- Same type: ${data.same || ''}
+- Variant: ${data.variant || ''}
+- Comprehensive: ${data.comprehensive || ''}
+
+**Chinese Explanation**  
+${data.chinese_summary || ''}
+            `.trim();
+            resultPreview.innerHTML = fullText.replace(/\n/g, '<br>');
+            if (window.renderMathInElement) {
+                window.renderMathInElement(resultPreview, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false }
+                    ]
+                });
+            }
+
+            aiStatus.textContent = 'Solution generated';
+            showToast('AI analysis complete.', 'success');
+            updateStepNumbers();
+
+        } catch (err) {
+            aiStatus.textContent = 'Error';
+            showToast('Error: ' + err.message, 'error');
+            resultPreview.innerHTML = `<span style="color:#C53030;">Error: ${err.message}</span>`;
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // ===== AI Assistant Chat =====
+    async function sendChat() {
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+        addChatMessage('user', msg);
+        chatInput.value = '';
+        addChatMessage('ai', 'Thinking...');
+
+        try {
+            const response = await fetch('/api/solve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: '[CHAT] ' + msg })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || `HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            let reply = data.solution || data.chinese_summary || 'No response.';
+            // Remove the "Thinking..." message
+            const messages = chatMessages.querySelectorAll('.msg');
+            if (messages.length > 0 && messages[messages.length-1].textContent === 'Thinking...') {
+                messages[messages.length-1].remove();
+            }
+            addChatMessage('ai', reply);
+
+        } catch (err) {
+            const messages = chatMessages.querySelectorAll('.msg');
+            if (messages.length > 0 && messages[messages.length-1].textContent === 'Thinking...') {
+                messages[messages.length-1].remove();
+            }
+            addChatMessage('ai', 'Error: ' + err.message);
+        }
+    }
+
+    function addChatMessage(type, text) {
+        const div = document.createElement('div');
+        div.className = 'msg ' + type;
+        div.textContent = text;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); sendChat(); }
+    });
+
+    // ===== Core functions =====
+    document.querySelectorAll('#errorTags .tag').forEach(tag => {
+        tag.addEventListener('click', function() {
+            document.querySelectorAll('#errorTags .tag').forEach(t => t.classList.remove('active-gold'));
+            this.classList.add('active-gold');
+            s2_category.value = this.dataset.value;
+        });
+    });
+
+    function getFormData() {
+        return {
+            content: s1_content.value.trim(),
+            scene: s1_scene.value.trim(),
+            keyPoint: s1_key.value.trim(),
+            category: s2_category.value,
+            detail: s2_detail.value.trim(),
+            solution: s3_solution.value.trim(),
+            // visual removed
+            name: s4_name.value.trim(),
+            condition: s4_condition.value.trim(),
+            contrast: s5_contrast.value.trim(),
+            signal: s5_signal.value.trim(),
+            same: s6_same.value.trim(),
+            variant: s6_variant.value.trim(),
+            comprehensive: s6_comprehensive.value.trim(),
+        };
+    }
+
+    function setFormData(data) {
+        s1_content.value = data.content || '';
+        s1_scene.value = data.scene || '';
+        s1_key.value = data.keyPoint || '';
+        s2_category.value = data.category || '';
+        s2_detail.value = data.detail || '';
+        s3_solution.value = data.solution || '';
+        // visual field is not used
+        s4_name.value = data.name || '';
+        s4_condition.value = data.condition || '';
+        s5_contrast.value = data.contrast || '';
+        s5_signal.value = data.signal || '';
+        s6_same.value = data.same || '';
+        s6_variant.value = data.variant || '';
+        s6_comprehensive.value = data.comprehensive || '';
+        s6_same_display.textContent = data.same || '—';
+        s6_variant_display.textContent = data.variant || '—';
+        s6_comprehensive_display.textContent = data.comprehensive || '—';
+        document.querySelectorAll('#errorTags .tag').forEach(t => {
+            t.classList.remove('active-gold');
+            if (t.dataset.value === data.category) t.classList.add('active-gold');
+        });
+        updateStepNumbers();
+    }
+
+    function resetForm() {
+        if (records.length > 0 && !confirm('Clear form content? Saved data will remain.')) return;
+        setFormData({});
+        editingId = null;
+        updateStepNumbers();
+        // Clear image previews
+        problemImagePreview.classList.remove('show');
+        problemImagePreview.src = '';
+        problemImageInput.value = '';
+        visualImagePreview.classList.remove('show');
+        visualImagePreview.src = '';
+        visualImageInput.value = '';
+        aiStatus.textContent = 'Ready';
+        chineseSummaryText.textContent = 'AI will provide a Chinese explanation here.';
+        resultPreview.innerHTML = '<em>Click "Generate Solution" to get AI analysis (supports LaTeX).</em>';
+        showToast('Form cleared', '');
+    }
+
+    function fillSample() {
+        const sample = {
+            content: 'A factory produces parts. A random sample of 25 parts has mean length 50mm and standard deviation 8mm. Construct a 95% confidence interval for the population mean length. (Variance unknown)',
+            scene: 'Monthly test · 2026-07-01',
+            keyPoint: 'Used z-distribution instead of t-distribution, interval too narrow.',
+            category: 'Knowledge Gap',
+            detail: 'Did not check whether variance is known; blindly used normal critical value.',
+            solution: 'Step 1: Identify unknown variance → use t-distribution.\nStep 2: Compute sample mean and std.\nStep 3: Find t critical value.\nStep 4: Calculate margin of error.\nStep 5: Construct interval.',
+            name: 'Confidence Interval (t)',
+            condition: 'Variance unknown; normal population or large sample.',
+            contrast: 'Confused with z-interval when variance known.',
+            signal: 'Keywords "confidence", "interval", "mean" → use t if variance unknown.',
+            same: 'n=30, x̄=52, s=9, 90% CI.',
+            variant: 'If variance known (σ=6), use z.',
+            comprehensive: 'Combine with hypothesis test.'
+        };
+        setFormData(sample);
+        chineseSummaryText.textContent = 'This is a confidence interval problem for population mean with unknown variance, use t-distribution.';
+        editingId = null;
+        updateStepNumbers();
+        showToast('Sample loaded.', '');
+    }
+
+    function updateStepNumbers() {
+        const data = getFormData();
+        const checks = [
+            data.content.length > 0,
+            data.category.length > 0 || data.detail.length > 0,
+            data.solution.length > 0,
+            data.name.length > 0,
+            data.contrast.length > 0 || data.signal.length > 0,
+            data.same.length > 0 || data.variant.length > 0 || data.comprehensive.length > 0,
+        ];
+        for (let i = 1; i <= 6; i++) {
+            const el = document.getElementById('num' + i);
+            if (checks[i-1]) el.classList.add('done');
+            else el.classList.remove('done');
+        }
+    }
+
+    document.querySelectorAll('#form input, #form textarea, #form select').forEach(el => {
+        el.addEventListener('input', updateStepNumbers);
+        el.addEventListener('change', updateStepNumbers);
+    });
+
+    function saveRecord() {
+        const data = getFormData();
+        if (!data.content) { showToast('Please fill in the problem statement.', 'error'); return; }
+        if (!data.solution) { showToast('Please generate a solution first.', 'error'); return; }
+        const now = new Date();
+        if (editingId) {
+            const idx = records.findIndex(r => r.id === editingId);
+            if (idx === -1) { showToast('Record not found.', 'error'); return; }
+            records[idx] = { ...records[idx], ...data, updatedAt: now.toISOString() };
+            showToast('Record updated.', 'success');
+            editingId = null;
+        } else {
+            records.unshift({ id: Date.now(), ...data, createdAt: now.toISOString(), updatedAt: now.toISOString() });
+            showToast('Record saved!', 'success');
+        }
+        saveRecords(records);
+        renderHistory();
+        updateStats();
+        resetForm();
+    }
+
+    function deleteRecord(id) {
+        if (!confirm('Delete this record?')) return;
+        records = records.filter(r => r.id !== id);
+        saveRecords(records);
+        renderHistory();
+        updateStats();
+        if (editingId === id) { resetForm(); editingId = null; }
+        showToast('Deleted.', '');
+    }
+
+    function editRecord(id) {
+        const r = records.find(rec => rec.id === id);
+        if (!r) return;
+        setFormData(r);
+        editingId = id;
+        updateStepNumbers();
+        showToast('Editing: ' + (r.content.slice(0,30) + (r.content.length>30?'…':'')), '');
+    }
+
+    function renderHistory() {
+        if (records.length === 0) {
+            historyList.innerHTML = `<div class="history-empty">No errors recorded yet. Start your first one!</div>`;
+            historyCount.textContent = '0 entries';
+            return;
+        }
+        let html = '<div class="history-list">';
+        records.forEach((r, idx) => {
+            const title = r.content.slice(0,50) + (r.content.length>50?'…':'');
+            const cat = r.category || 'Uncategorized';
+            const date = r.createdAt ? r.createdAt.slice(0,10) : '';
+            html += `
+                <div class="history-item" onclick="editRecord(${r.id})">
+                    <span class="h-index">#${idx+1}</span>
+                    <span class="h-title">${title}</span>
+                    <span class="h-meta">
+                        <span class="tag-cat">${cat}</span>
+                        <span>${date}</span>
+                    </span>
+                    <div class="h-actions">
+                        <button onclick="event.stopPropagation();editRecord(${r.id})">✎</button>
+                        <button class="del" onclick="event.stopPropagation();deleteRecord(${r.id})">✕</button>
+                        <button onclick="event.stopPropagation();viewRecord(${r.id})">👁</button>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        historyList.innerHTML = html;
+        historyCount.textContent = records.length + ' entries';
+    }
+
+    function viewRecord(id) {
+        const r = records.find(rec => rec.id === id);
+        if (!r) return;
+        const modal = document.getElementById('detailModal');
+        document.getElementById('modalTitle').textContent = 'Error Detail';
+        const meta = document.getElementById('modalMeta');
+        const cat = r.category || 'Uncategorized';
+        meta.innerHTML = `<span>${cat}</span><span>${r.createdAt ? r.createdAt.slice(0,10) : 'unknown'}</span>${r.scene ? '<span>'+r.scene+'</span>' : ''}`;
+        const body = document.getElementById('modalBody');
+        const blocks = [
+            { label: 'Problem', text: r.content },
+            { label: 'Critical point', text: r.keyPoint },
+            { label: 'Error diagnosis', text: r.detail },
+            { label: 'Correct solution', text: r.solution },
+            { label: 'Topic', text: r.name },
+            { label: 'Prerequisites', text: r.condition },
+            { label: 'Confusable concepts', text: r.contrast },
+            { label: 'Solving signal', text: r.signal },
+            { label: 'Same type', text: r.same },
+            { label: 'Variant', text: r.variant },
+            { label: 'Comprehensive', text: r.comprehensive },
+        ];
+        let bodyHtml = '';
+        blocks.forEach(b => {
+            if (b.text) {
+                bodyHtml += `<div class="m-block"><div class="m-label">${b.label}</div><div class="m-text">${b.text}</div></div>`;
+            }
+        });
+        if (!bodyHtml) bodyHtml = '<div class="m-block"><div class="m-text empty">No details</div></div>';
+        body.innerHTML = bodyHtml;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        document.getElementById('detailModal').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    function showToast(msg, type = '') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast ' + type;
+        void t.offsetWidth;
+        t.classList.add('show');
+        clearTimeout(t._hide);
+        t._hide = setTimeout(() => t.classList.remove('show'), 2600);
+    }
+
+    function updateStats() {
+        totalCount.textContent = records.length;
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        weekStart.setHours(0,0,0,0);
+        const weekCountVal = records.filter(r => new Date(r.createdAt) >= weekStart).length;
+        weekCount.textContent = weekCountVal;
+    }
+
+    function exportData() {
+        if (records.length === 0) { showToast('No data to export.', 'error'); return; }
+        const data = JSON.stringify(records, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `errors_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Exported successfully.', 'success');
+    }
+
+    function importData() {
+        document.getElementById('fileInput').click();
+    }
+
+    function handleImport(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                if (!Array.isArray(data) || data.length === 0) throw new Error('Invalid format');
+                if (!data[0].content && !data[0].solution) throw new Error('Data structure mismatch');
+                if (!confirm(`Import ${data.length} records? Append to existing?`)) return;
+                records = [...records, ...data];
+                saveRecords(records);
+                renderHistory();
+                updateStats();
+                showToast(`Imported ${data.length} records.`, 'success');
+            } catch (err) {
+                showToast('Import failed: ' + err.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+    }
+
+    function clearAll() {
+        if (records.length === 0) { showToast('Already empty.', ''); return; }
+        if (!confirm(`Delete all ${records.length} records permanently?`)) return;
+        records = [];
+        saveRecords(records);
+        renderHistory();
+        updateStats();
+        resetForm();
+        showToast('All cleared.', '');
+    }
+
+    function init() {
+        renderHistory();
+        updateStats();
+        updateStepNumbers();
+        if (window.location.search.includes('sample')) fillSample();
+    }
+    init();
+
+    // Expose
+    window.aiGenerate = aiGenerate;
+    window.sendChat = sendChat;
+    window.saveRecord = saveRecord;
+    window.resetForm = resetForm;
+    window.fillSample = fillSample;
+    window.deleteRecord = deleteRecord;
+    window.editRecord = editRecord;
+    window.viewRecord = viewRecord;
+    window.closeModal = closeModal;
+    window.exportData = exportData;
+    window.importData = importData;
+    window.handleImport = handleImport;
+    window.clearAll = clearAll;
+</script>
+</body>
+</html>
